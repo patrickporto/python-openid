@@ -54,13 +54,16 @@ class DiscoveryResult(object):
         return (self.usedYadisLocation() or
                 self.content_type == YADIS_CONTENT_TYPE)
 
-def discover(uri):
+def discover(uri,cargs=None):
     """Discover services for a given URI.
 
     @param uri: The identity URI as a well-formed http or https
         URI. The well-formedness and the protocol are not checked, but
         the results of this function are undefined if those properties
         do not hold.
+    @param cargs: dictionary where keys are optional flags to libcurl,
+        and values are the actual values.
+        ex: cargs['CAINFO']='path-to-custom CA bundle'
 
     @return: DiscoveryResult object
 
@@ -69,7 +72,7 @@ def discover(uri):
     @raises DiscoveryFailure: When the HTTP response does not have a 200 code.
     """
     result = DiscoveryResult(uri)
-    resp = fetchers.fetch(uri, headers={'Accept': YADIS_ACCEPT_HEADER})
+    resp = fetchers.fetch(uri, headers={'Accept': YADIS_ACCEPT_HEADER},cargs=cargs)
     if resp.status not in (200, 206):
         raise DiscoveryFailure(
             'HTTP Response status from identity URL host is not 200. '
