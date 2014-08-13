@@ -257,26 +257,20 @@ class CurlHTTPFetcher(HTTPFetcher):
             unused_http_status_line = header_file.readline()
             unused_http_status_line = header_file.readline()
 
-        lines = [line.strip() for line in header_file]
-
-        # and the blank line from the end
-        empty_line = lines.pop()
-        if empty_line:
-            raise HTTPError("No blank line at end of headers: %r" % (line,))
+        # Ignore malformed HTTP headers
+        lines = [line.strip() for line in header_file if ':' in line]
 
         headers = {}
         for line in lines:
-            try:
-                name, value = line.split(':', 1)
-            except ValueError:
-                raise HTTPError(
-                    "Malformed HTTP header line in response: %r" % (line,))
+            parts = line.split(':', 1)
 
-            value = value.strip()
+            if len(parts) == 2:
+                name, value = parts
+                value = value.strip()
 
-            # HTTP headers are case-insensitive
-            name = name.lower()
-            headers[name] = value
+                # HTTP headers are case-insensitive
+                name = name.lower()
+                headers[name] = value
 
         return headers
 
