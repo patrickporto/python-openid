@@ -208,6 +208,9 @@ class OpenIDRequestHandler(BaseHTTPRequestHandler):
                         form_tag_attrs={'id':'openid_message'},
                         immediate=immediate)
 
+                    self.send_response(200)
+                    self.send_header('Content-Type', "text/html")
+                    self.end_headers()
                     self.wfile.write(form_html)
 
     def requestRegistrationData(self, request):
