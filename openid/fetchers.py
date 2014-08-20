@@ -32,14 +32,14 @@ except ImportError:
 USER_AGENT = "python-openid/%s (%s)" % (openid.__version__, sys.platform)
 MAX_RESPONSE_KB = 1024
 
-def fetch(url, body=None, headers=None):
+def fetch(url, body=None, headers=None,cargs=None):
     """Invoke the fetch method on the default fetcher. Most users
     should need only this method.
 
     @raises Exception: any exceptions that may be raised by the default fetcher
     """
     fetcher = getDefaultFetcher()
-    return fetcher.fetch(url, body, headers)
+    return fetcher.fetch(url, body, headers,cargs)
 
 def createHTTPFetcher():
     """Create a default HTTP fetcher instance
@@ -279,7 +279,7 @@ class CurlHTTPFetcher(HTTPFetcher):
         # XXX: make sure url is well-formed and routeable
         return _allowedURL(url)
 
-    def fetch(self, url, body=None, headers=None):
+    def fetch(self, url, body=None, headers=None,cargs=None):
         stop = int(time.time()) + self.ALLOWED_TIME
         off = self.ALLOWED_TIME
 
@@ -300,6 +300,10 @@ class CurlHTTPFetcher(HTTPFetcher):
 
             if header_list:
                 c.setopt(pycurl.HTTPHEADER, header_list)
+
+            if cargs is not None:
+                for key,val in cargs.iteritems():
+                    c.setopt(getattr(pycurl,key),val)
 
             # Presence of a body indicates that we should do a POST
             if body is not None:
